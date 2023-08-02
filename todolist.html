@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Todo List App</title>
+    <style>
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #b0ebde;
+      }
+      #taskListContainer {
+        width: 500px;
+        height: 500px;
+        padding: 20px;
+        background-color: #fffdff;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2), 0 0 20px rgba(0, 0, 0, 0.1), 0 0 30px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+        overflow-y: scroll;
+      }
+      h1 {
+        margin-top: 0;
+        padding-top: 10px;
+        text-align: center;
+        font-size: 2rem;
+        color: #775a23;
+        cursor: pointer;
+        transition: color 0.3s ease-in-out;
+      }
+      h1:hover {
+        color: #ff9900;
+      }
+      .task {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        padding: 10px;
+        border: 1px solid black;
+        border-radius: 5px;
+        overflow: hidden;
+        white-space: nowrap;
+      }
+      .task.done {
+        background-color: #d2f4d2;
+      }
+      .task .checkbox {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 20px;
+        height: 20px;
+        margin-right: 10px;
+        border: 1px solid black;
+        border-radius: 50%;
+        cursor: pointer;
+      }
+      .task .checkbox.done {
+        background-color: green;
+        color: white;
+      }
+      .task .checkbox.delete {
+        background-color: red;
+        color: white;
+      }
+      .task .name {
+        flex-grow: 1;
+        text-decoration: none;
+        color: rgb(101, 43, 43);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin: 0 10px;
+      }
+      .task .delete-checkbox {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 20px;
+        height: 20px;
+        margin-left: 10px;
+        margin-right: 10px;
+        border: 1px solid black;
+        border-radius: 50%;
+        cursor: pointer;
+      }
+      .task .delete-checkbox .icon {
+        font-size: 16px;
+        cursor: pointer;
+      }
+      button {
+        margin-top: 16px;
+        margin-left: 16px;
+      }
+      .checkbox-container {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+      .checkbox-container label {
+        margin-right: 10px;
+        padding-right: 5px;
+      }
+      .checkbox-container input[type="text"] {
+        padding: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="taskListContainer">
+      <h1>Todo List App</h1>
+      <div class="checkbox-container">
+        <label for="taskInput">Task name:</label>
+        <input type="text" id="taskInput">
+        <button onclick="addTask()">Add Task</button>
+      </div>
+      <div id="taskList"></div>
+    </div>
+    <script>
+      // Initialize tasks array
+      let tasks = [];
+
+      // Get DOM elements
+      const taskInput = document.getElementById("taskInput");
+      const addTaskButton = document.querySelector("button");
+      const taskList = document.getElementById("taskList");
+      const taskListContainer = document.getElementById("taskListContainer");
+
+      // Add event listeners
+      addTaskButton.addEventListener("click", addTask);
+      taskInput.addEventListener("keyup", function(event) {
+        if (event.keyCode === 13) {
+          event.preventDefault();
+          addTaskButton.click();
+        }
+      });
+
+      // Function to add a new task to the list and array
+      function addTask() {
+        // Get the task name from the input field
+        const taskName = taskInput.value.trim();
+
+        // Check if the task name is not empty
+        if (taskName !== "") {
+          // Create a new task object with the name and status
+          const task = {name: taskName,status: "todo"};
+
+          // Add the new task to the array and clear the input field
+          tasks.push(task);
+          taskInput.value = "";
+
+          // Render the updated task list
+          renderTaskList();
+        }
+      }
+
+      // Function to render the task list
+      function renderTaskList() {
+        // Clear the task list container
+        taskList.innerHTML = "";
+
+        // Loop through the tasks array and create a task element for each task
+        for (let i = 0; i < tasks.length; i++) {
+          const task = tasks[i];
+
+          // Create task element
+          const taskElement = document.createElement("div");
+          taskElement.classList.add("task");
+          if (task.status === "done") {
+            taskElement.classList.add("done");
+          }
+
+          // Create checkbox element
+          const checkboxElement = document.createElement("div");
+          checkboxElement.classList.add("checkbox");
+          checkboxElement.innerText = task.status === "done" ? "✓" : "";
+          checkboxElement.addEventListener("click", function() {
+            toggleTaskStatus(i);
+          });
+
+          // Create task name element
+          const nameElement = document.createElement("div");
+          nameElement.classList.add("name");
+          nameElement.innerText = task.name;
+
+          // Create delete checkbox element
+          const deleteCheckboxElement = document.createElement("div");
+          deleteCheckboxElement.classList.add("delete-checkbox");
+          deleteCheckboxElement.innerHTML = '<i class="icon">x</i>';
+          deleteCheckboxElement.addEventListener("click", function() {
+            deleteTask(i);
+          });
+
+          // Append elements to task element
+          taskElement.appendChild(checkboxElement);
+          taskElement.appendChild(nameElement);
+          taskElement.appendChild(deleteCheckboxElement);
+
+          // Append task element to task list container
+          taskList.appendChild(taskElement);
+        }
+      }
+
+      // Function to toggle the status of a task
+      function toggleTaskStatus(index) {
+        if (tasks[index].status === "todo") {
+          tasks[index].status = "done";
+        } else {
+          tasks[index].status = "todo";
+        }
+        renderTaskList();
+      }
+
+      // Function to delete a task
+      function deleteTask(index) {
+        tasks.splice(index, 1);
+        renderTaskList();
+      }
+
+      // Render the initial task list
+      renderTaskList();
+    </script>
+  </body>
+</html>
